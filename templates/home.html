@@ -1,0 +1,166 @@
+<!-- chatapp/templates/chatapp/home.html
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat with Jarvis</title>
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition;
+        var SpeechGrammarList = SpeechGrammarList || webkitSpeechGrammarList;
+        var SpeechRecognitionEvent = SpeechRecognitionEvent || webkitSpeechRecognitionEvent;
+    </script>
+</head>
+<body>
+    <h1>Chat with Jarvis</h1>
+    <input type="text" id="userInput" placeholder="Enter your query...">
+    <button onclick="askQuestion()">Ask</button>
+    <button onclick="startListening()">Start Listening</button>
+
+    <p id="responseText"></p>
+
+    <script>
+        let recognizing = false;
+        let recognition;
+
+        function startListening() {
+            if (!recognizing) {
+                recognition = new webkitSpeechRecognition();
+                recognition.continuous = true;
+                recognition.interimResults = true;
+                recognition.lang = 'en-IN';
+                
+                recognition.onstart = function() {
+                    recognizing = true;
+                };
+                
+                recognition.onend = function() {
+                    recognizing = false;
+                };
+                
+                recognition.onresult = function(event) {
+                    const result = event.results[event.results.length - 1][0].transcript;
+                    document.getElementById("userInput").value = result;
+                };
+                
+                recognition.start();
+            }
+        }
+
+        function askQuestion() {
+            const userInput = document.getElementById("userInput").value;
+            const csrfToken = document.getElementsByName("csrfmiddlewaretoken")[0].value;
+
+            fetch("", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "X-CSRFToken": csrfToken,
+                },
+                body: "user_input=" + encodeURIComponent(userInput),
+            })
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById("responseText").innerText = data;
+                speak(data);
+            })
+            .catch(error => {
+                console.error("Error:", error);
+            });
+        }
+
+        function speak(text) {
+            const synth = window.speechSynthesis;
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'en-IN';
+            synth.speak(utterance);
+        }
+    </script>
+</body>
+</html> -->
+<!-- chatapp/templates/chatapp/home.html -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat with Jarvis</title>
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition;
+        var SpeechGrammarList = SpeechGrammarList || webkitSpeechGrammarList;
+        var SpeechRecognitionEvent = SpeechRecognitionEvent || webkitSpeechRecognitionEvent;
+    </script>
+</head>
+<body>
+    <h1>Chat with Jarvis</h1>
+    <form id="chatForm" method="post">
+        {% csrf_token %}
+        <input type="text" id="userInput" name="user_input" placeholder="Enter your query...">
+        <button type="button" onclick="askQuestion()">Ask</button>
+        <button type="button" onclick="startListening()">Start Listening</button>
+    </form>
+
+    <p id="responseText"></p>
+
+    <script>
+        let recognizing = false;
+        let recognition;
+
+        function startListening() {
+            if (!recognizing) {
+                recognition = new webkitSpeechRecognition();
+                recognition.continuous = true;
+                recognition.interimResults = true;
+                recognition.lang = 'en-IN';
+                
+                recognition.onstart = function() {
+                    recognizing = true;
+                };
+                
+                recognition.onend = function() {
+                    recognizing = false;
+                };
+                
+                recognition.onresult = function(event) {
+                    const result = event.results[event.results.length - 1][0].transcript;
+                    document.getElementById("userInput").value = result;
+                };
+                
+                recognition.start();
+            }
+        }
+
+        function askQuestion() {
+            const userInput = document.getElementById("userInput").value;
+            const form = document.getElementById("chatForm");
+            const csrfToken = form.getElementsByTagName("input")[0].value;
+
+            fetch("", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "X-CSRFToken": csrfToken,
+                },
+                body: "user_input=" + encodeURIComponent(userInput),
+            })
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById("responseText").innerText = data;
+                speak(data);
+            })
+            .catch(error => {
+                console.error("Error:", error);
+            });
+        }
+
+        function speak(text) {
+            const synth = window.speechSynthesis;
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'en-IN';
+            synth.speak(utterance);
+        }
+    </script>
+</body>
+</html>

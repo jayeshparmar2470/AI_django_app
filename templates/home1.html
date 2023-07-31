@@ -1,0 +1,99 @@
+<!-- chatapp/templates/chatapp/home.html -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat with Jarvis</title>
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition;
+        var SpeechGrammarList = SpeechGrammarList || webkitSpeechGrammarList;
+        var SpeechRecognitionEvent = SpeechRecognitionEvent || webkitSpeechRecognitionEvent;
+    </script>
+</head>
+<body>
+    <h1>Chat with Jarvis</h1>
+    <input type="text" id="userInput" placeholder="Enter your query...">
+    <button onclick="askQuestion()">Ask</button>
+    <button onclick="startListening()">Start Listening</button>
+
+    <p id="responseText"></p>
+
+    <script>
+        let recognizing = false;
+        let recognition;
+
+        function startListening() {
+            if (!recognizing) {
+                recognition = new webkitSpeechRecognition();
+                recognition.continuous = true;
+                recognition.interimResults = true;
+                recognition.lang = 'en-IN';
+                
+                recognition.onstart = function() {
+                    recognizing = true;
+                };
+                
+                recognition.onend = function() {
+                    recognizing = false;
+                };
+                
+                recognition.onresult = function(event) {
+                    const result = event.results[event.results.length - 1][0].transcript;
+                    document.getElementById("userInput").value = result;
+                    askQuestion(); // Call the askQuestion() function after capturing voice input
+                };
+                
+                recognition.start();
+            }
+        }
+
+        function askQuestion() {
+            const userInput = document.getElementById("userInput").value;
+            const csrfToken = getCookie("csrftoken");
+
+            fetch("", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "X-CSRFToken": csrfToken,
+                },
+                body: "user_input=" + encodeURIComponent(userInput),
+            })
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById("responseText").innerText = data;
+                speak(data);
+            })
+            .catch(error => {
+                console.error("Error:", error);
+            });
+        }
+
+        function speak(text) {
+            const synth = window.speechSynthesis;
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'en-IN';
+            synth.speak(utterance);
+        }
+
+        // Function to get the CSRF token from the cookie
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = cookies[i].trim();
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
+</body>
+</html>
